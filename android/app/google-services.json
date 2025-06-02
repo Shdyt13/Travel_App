@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "599763119744",
+    "project_id": "wisataapp-59ee5",
+    "storage_bucket": "wisataapp-59ee5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:599763119744:android:134597ca08f55b6cc00065",
+        "android_client_info": {
+          "package_name": "com.umrah.travel"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAKfRYiDPWRn_ay5W-S9S3d0Oo80TeKFCo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
