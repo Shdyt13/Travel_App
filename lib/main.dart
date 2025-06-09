@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'pages/login_page.dart';
-import 'pages/register_page.dart';
-import 'pages/main_navigation.dart';
+import 'screens/home_page.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+void main() {
   runApp(const MyApp());
 }
 
@@ -16,16 +11,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Wisata App',
+      title: 'Jejak Pulau Bintan',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+        primarySwatch: Colors.orange,
+        scaffoldBackgroundColor: Colors.white,
       ),
-      home: const MainNavigation(),
-      routes: {
-        '/login': (context) => const LoginPage(),
-        '/register': (context) => const RegisterPage(),
-      },
+      home: const HomePage(),
     );
   }
 }

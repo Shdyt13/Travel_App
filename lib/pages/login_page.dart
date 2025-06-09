@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -11,12 +12,42 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   String email = '';
   String password = '';
+  bool _isLoading = false;
 
-  void _submit() {
+  void _login() async {
     if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login berhasil (simulasi)')),
-      );
+      setState(() => _isLoading = true);
+      try {
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+        if (context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Login berhasil')));
+          // Navigasi ke halaman utama '/'
+          Navigator.pushReplacementNamed(context, '/');
+        }
+      } on FirebaseAuthException catch (e) {
+        String message = 'Login gagal';
+        if (e.code == 'user-not-found') {
+          message = 'Akun tidak ditemukan';
+        } else if (e.code == 'wrong-password') {
+          message = 'Password salah';
+        } else if (e.code == 'invalid-email') {
+          message = 'Format email tidak valid';
+        }
+        if (context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(message)));
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isLoading = false);
+        }
+      }
     }
   }
 
@@ -68,12 +99,24 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 30),
               ElevatedButton(
-                onPressed: _submit,
+                onPressed: _isLoading ? null : _login,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.deepPurple,
                   padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
-                child: const Text('Login', style: TextStyle(fontSize: 18)),
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text('Login', style: TextStyle(fontSize: 18)),
               ),
               const SizedBox(height: 15),
               Row(

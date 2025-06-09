@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -12,12 +13,35 @@ class _RegisterPageState extends State<RegisterPage> {
   String email = '';
   String password = '';
   String confirmPassword = '';
+  bool _isLoading = false;
 
-  void _submit() {
+  void _register() async {
     if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Registrasi berhasil (simulasi)')),
-      );
+      setState(() => _isLoading = true);
+      try {
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+        if (context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Registrasi berhasil')));
+          Navigator.pushReplacementNamed(context, '/login');
+        }
+      } on FirebaseAuthException catch (e) {
+        String message = 'Terjadi kesalahan';
+        if (e.code == 'email-already-in-use') {
+          message = 'Email sudah digunakan';
+        } else if (e.code == 'weak-password') {
+          message = 'Password terlalu lemah';
+        }
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(message)));
+      } finally {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -62,13 +86,8 @@ class _RegisterPageState extends State<RegisterPage> {
                 obscureText: true,
                 onChanged: (val) => password = val,
                 validator: (val) {
-                  if (val == null || val.isEmpty) {
-                    return 'Konfirmasi password wajib diisi';
-                  }
-                  if (val != password) {
-                    return 'Password tidak cocok';
-                  }
-
+                  if (val == null || val.isEmpty) return 'Password wajib diisi';
+                  if (val.length < 6) return 'Password minimal 6 karakter';
                   return null;
                 },
               ),
@@ -82,21 +101,23 @@ class _RegisterPageState extends State<RegisterPage> {
                 obscureText: true,
                 onChanged: (val) => confirmPassword = val,
                 validator: (val) {
-                  if (val == null || val.isEmpty)
+                  if (val == null || val.isEmpty) {
                     return 'Konfirmasi password wajib diisi';
-
+                  }
                   if (val != password) return 'Password tidak cocok';
                   return null;
                 },
               ),
               const SizedBox(height: 30),
               ElevatedButton(
-                onPressed: _submit,
+                onPressed: _isLoading ? null : _register,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.deepPurple,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
-                child: const Text('Daftar', style: TextStyle(fontSize: 18)),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text('Daftar', style: TextStyle(fontSize: 18)),
               ),
               const SizedBox(height: 15),
               Row(
